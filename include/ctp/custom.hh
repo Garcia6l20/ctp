@@ -20,13 +20,13 @@ namespace ctp {
 
     template <class T>
     struct Reflect<std::vector<T>> {
-        using target_type = std::span<target<T> const>;
+        using target_type = std::span<target<T const> const>;
 
         static consteval auto serialize(Serializer& s, std::vector<T> const& v) -> void {
             s.push(reflect_constant_array(v));
         }
 
-        static consteval auto deserialize(std::meta::info r) -> std::span<target<T> const> {
+        static consteval auto deserialize(std::meta::info r) -> target_type {
             return std::span(extract<target<T> const*>(r), extent(type_of(r)));
         }
     };
