@@ -71,16 +71,19 @@ namespace impl {
     consteval auto default_serialize(T const& v) -> std::meta::info;
 }
 
-inline constexpr auto normalize =
+inline constexpr auto normalize = 
     []<class T>([[maybe_unused]] T& v) -> void {
-        #ifdef CTP_HAS_STRING_LITERAL
         if constexpr (requires { std::is_string_literal(v); }) {
+#ifdef __clang__
             if (char const* root = std::string_literal_from(v)) {
                 char const* global = std::define_static_string(std::string_view(root));
                 v = global + (v - root);
             }
+#elifdef __GNUC__
+            // no std::string_literal_from yet on GCC so we define a new object for now
+            v = std::define_static_string(std::string_view(v));
+#endif
         }
-        #endif
     };
 
 // Extension of std::meta::reflect_constant that is customizable via Reflect<T>.
